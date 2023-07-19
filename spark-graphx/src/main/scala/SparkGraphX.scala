@@ -25,6 +25,7 @@ object SparkGraphX {
 
   /**
    * Simplest example from documentation.
+   * and done.
    */
   private def runSample(): Unit = {
 
