@@ -1,0 +1,31 @@
+#!/bin/zsh
+
+chmod +x ./spark-graphx/generateJAR
+
+do_not_build=false
+
+for arr in $@ ; do
+
+  if [[ $arr = "--restart" ]] ; then
+    echo "Restarting GraphX App."
+    echo "Removing Docker container."
+    docker stop spark-graphx
+    docker rm -v spark-graphx
+    docker rmi graph_spark-graphx
+  fi
+
+  if [[ $arr = "--do-not-build" ]] ; then
+    do_not_build=true
+  fi
+
+done
+
+if [[ $do_not_build = false ]] ; then
+  echo "Removing Binaries."
+  rm -rf ./spark-graphx/target/scala-2.12/
+  ./spark-graphx/generateJAR
+  rm -rf $HOME/graph/logs/application.log
+fi
+
+
+docker-compose up -d # --build
