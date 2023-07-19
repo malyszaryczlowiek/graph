@@ -22,6 +22,13 @@ object SparkGraphX {
 
   }
 
+  /**
+   *
+   */
+  private def readFromDatabase(): Unit = {
+    // TODO implement
+  }
+
 
   /**
    * Simplest example from documentation.
