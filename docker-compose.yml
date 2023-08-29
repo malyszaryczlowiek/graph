@@ -20,6 +20,27 @@ services:
     ports:
       - '5438:5432'
 
+
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:6.15
+    depends_on:
+      - db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    networks:
+      - graphx-network
+    restart: unless-stopped
+    logging:
+      driver: "none"
+
+
+
+
   spark-graphx:
     container_name: spark-graphx
     build:

@@ -1,6 +1,7 @@
 -- CREATE DATABASE with user information
 CREATE TABLE IF NOT EXISTS users (
   user_id uuid DEFAULT gen_random_uuid () UNIQUE,
+  user_num_id BIGSERIAL NOT NULL UNIQUE, -- added, works as vertex id
   login varchar(255) UNIQUE,
   pass  varchar(255) NOT NULL,
   PRIMARY KEY (user_id, login)
@@ -67,6 +68,19 @@ INSERT INTO users (user_id, login, pass) VALUES ( 'c8b8c9e6-8cb5-4e5c-86b3-84f55
 INSERT INTO users (user_id, login, pass) VALUES ( '7246bdb7-d4af-4195-a011-d82b13845580', 'Spejson', 'R0fLJZOJj.79gepc.MnAVSlFpq6cY16'); -- password Password2!
 INSERT INTO settings (user_id, zone_id) VALUES  ( 'c8b8c9e6-8cb5-4e5c-86b3-84f55f012172', 'Europe/Warsaw');
 INSERT INTO settings (user_id, zone_id) VALUES  ( '7246bdb7-d4af-4195-a011-d82b13845580', 'Europe/Warsaw');
+
+-- todo stworzyć jeszcze dwa chaty pojedyńcze i jeden chat grupowy i zrobić graph analysę
+
+
+
+
+
+
+
+
+
+
+
 
 -- salt $2a$10$8K1p/a0dL1LXMIgoEDFrwO
 
