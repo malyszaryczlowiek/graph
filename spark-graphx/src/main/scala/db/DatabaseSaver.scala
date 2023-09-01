@@ -6,11 +6,17 @@ import org.apache.spark.sql.Row
 import java.sql.{Connection, PreparedStatement}
 import scala.util.{Failure, Success, Using}
 
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
+
+
 abstract class DatabaseSaver(table: DbTable) extends Serializable {
+
+  private val logger: Logger = LogManager.getLogger(classOf[DatabaseSaver])
 
 
   def createTable(implicit connection: Connection) : Int = {
-    println(s"########## Tworzenie tabeli: ${table.tableName}")
+    // todo change to logger -> println(s"########## Tworzenie tabeli: ${table.tableName}")
     val sql = s"CREATE TABLE IF NOT EXISTS ${table.tableName} ${table.getTableColumnsWithTypes} "
     Using(connection.prepareStatement(sql)) {
       (statement: PreparedStatement) => statement.executeUpdate()

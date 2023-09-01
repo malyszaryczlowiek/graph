@@ -14,6 +14,7 @@ class Database
 object Database {
 
   private val logger: Logger = LogManager.getLogger(classOf[Database])
+
   private val dbProps = new Properties
   dbProps.setProperty("user",     dbConfig.user)
   dbProps.setProperty("password", dbConfig.pass)

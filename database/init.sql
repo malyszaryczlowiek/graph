@@ -66,8 +66,35 @@ CREATE TABLE IF NOT EXISTS logging_attempts (
 -- in db we store truncated hashed password
 INSERT INTO users (user_id, login, pass) VALUES ( 'c8b8c9e6-8cb5-4e5c-86b3-84f55f012172', 'Walo',    '5gK1Ve3u3CosziY2B6ZUi8bffjEigTe'); -- password Password1!  salt: $2a$10$8K1p/a0dL1LXMIgoEDFrwO
 INSERT INTO users (user_id, login, pass) VALUES ( '7246bdb7-d4af-4195-a011-d82b13845580', 'Spejson', 'R0fLJZOJj.79gepc.MnAVSlFpq6cY16'); -- password Password2!
-INSERT INTO settings (user_id, zone_id) VALUES  ( 'c8b8c9e6-8cb5-4e5c-86b3-84f55f012172', 'Europe/Warsaw');
-INSERT INTO settings (user_id, zone_id) VALUES  ( '7246bdb7-d4af-4195-a011-d82b13845580', 'Europe/Warsaw');
+INSERT INTO users (user_id, login, pass) VALUES ( '13eb7eff-a75f-498d-846e-c9054b72c907', 'Solaris', '5gK1Ve3u3CosziY2B6ZUi8bffjEigTe'); -- password Password1!  salt: $2a$10$8K1p/a0dL1LXMIgoEDFrwO
+INSERT INTO users (user_id, login, pass) VALUES ( 'af63219b-27d8-4144-b7e1-2ac4ad083dbe', 'Rudy',    'R0fLJZOJj.79gepc.MnAVSlFpq6cY16'); -- password Password2!
+
+-- adding three chats
+INSERT INTO users_chats (user_id, chat_id, chat_name) VALUES (
+  'c8b8c9e6-8cb5-4e5c-86b3-84f55f012172', 'chat--c8b8c9e6-8cb5-4e5c-86b3-84f55f012172--7246bdb7-d4af-4195-a011-d82b13845580','chat1'
+);
+INSERT INTO users_chats (user_id, chat_id, chat_name) VALUES (
+  '7246bdb7-d4af-4195-a011-d82b13845580', 'chat--c8b8c9e6-8cb5-4e5c-86b3-84f55f012172--7246bdb7-d4af-4195-a011-d82b13845580','chat1'
+);
+INSERT INTO users_chats (user_id, chat_id, chat_name) VALUES (
+  '13eb7eff-a75f-498d-846e-c9054b72c907', 'chat--13eb7eff-a75f-498d-846e-c9054b72c907--af63219b-27d8-4144-b7e1-2ac4ad083dbe','chat2'
+);
+INSERT INTO users_chats (user_id, chat_id, chat_name) VALUES (
+  'af63219b-27d8-4144-b7e1-2ac4ad083dbe', 'chat--13eb7eff-a75f-498d-846e-c9054b72c907--af63219b-27d8-4144-b7e1-2ac4ad083dbe','chat2'
+);
+INSERT INTO users_chats (user_id, chat_id, chat_name) VALUES (
+  'c8b8c9e6-8cb5-4e5c-86b3-84f55f012172', 'chat--c8b8c9e6-8cb5-4e5c-86b3-84f55f012172--af63219b-27d8-4144-b7e1-2ac4ad083dbe','chat3'
+);
+INSERT INTO users_chats (user_id, chat_id, chat_name) VALUES (
+  'af63219b-27d8-4144-b7e1-2ac4ad083dbe', 'chat--c8b8c9e6-8cb5-4e5c-86b3-84f55f012172--af63219b-27d8-4144-b7e1-2ac4ad083dbe','chat3'
+);
+
+
+
+
+
+--INSERT INTO settings (user_id, zone_id) VALUES  ( 'c8b8c9e6-8cb5-4e5c-86b3-84f55f012172', 'Europe/Warsaw');
+--INSERT INTO settings (user_id, zone_id) VALUES  ( '7246bdb7-d4af-4195-a011-d82b13845580', 'Europe/Warsaw');
 
 -- todo stworzyć jeszcze dwa chaty pojedyńcze i jeden chat grupowy i zrobić graph analysę
 

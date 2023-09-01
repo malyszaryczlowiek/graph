@@ -15,6 +15,10 @@ lazy val root = (project in file("."))
       // slf4j
       "org.slf4j" % "slf4j-nop" % "2.0.5",
 
+      //db
+      "org.postgresql" % "postgresql" % "42.3.3",
+      // org.postgresql:postgresql:42.3.3
+
       // log4j logger
       "org.apache.logging.log4j" % "log4j-api"  % "2.20.0",
       "org.apache.logging.log4j" % "log4j-core" % "2.20.0",

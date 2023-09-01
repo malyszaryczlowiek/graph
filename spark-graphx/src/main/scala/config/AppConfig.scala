@@ -41,7 +41,7 @@ object AppConfig {
     config.getString(s"db.driver"),
     config.getString(s"db.protocol"),
     config.getString(s"db.server"),
-    config.getInt(s"db.port"),
+    config.getInt(   s"db.port"),
     config.getString(s"db.schema"),
     config.getString(s"db.user"),
     config.getString(s"db.pass"),
@@ -57,7 +57,7 @@ object AppConfig {
 //    config.getInt("topic-replication-factor").toShort
 //  )
 
-  val analysisDir: String = config.getString("output-analysis-dir")
+  // val analysisDir: String = config.getString("output-analysis-dir")
 
 
 }

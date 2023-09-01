@@ -1,28 +1,25 @@
 package io.github.malyszaryczlowiek
 package runners
 
-
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
-import org.apache.spark.sql.{KeyValueGroupedDataset, Row, SparkSession}
-import org.apache.spark._
-import org.apache.spark.graphx._
-import org.apache.spark.sql.types.{StructField, StructType}
 
-import scala.util.Random // graphx._
-// To make some of the examples work we will also need RDD
+import org.apache.spark.sql.{KeyValueGroupedDataset, Row, SparkSession}
+import org.apache.spark.graphx._
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.functions.expr
 import org.apache.spark.sql.types._
 
 import config.AppConfig.dbConfig
 import mappers.Mappers._
-import encoders.GraphEncoders._
+//import encoders.GraphEncoders._
 
 
 
-class DbGraphRunner {
+class  DbGraphRunner
+object DbGraphRunner {
 
-  private val logger: Logger = LogManager.getLogger(classOf[GraphRunner])
+  private val logger: Logger = LogManager.getLogger(classOf[DbGraphRunner])
 
   def run(): Unit = {
 
@@ -61,17 +58,17 @@ class DbGraphRunner {
       .option("dbtable",  "users")
       .option("user",     dbConfig.user)
       .option("password", dbConfig.pass)
-      .schema( usersSchema )
+      //.schema( usersSchema )
       .load()
+      .withColumnRenamed("user_id", "uid")
+
+    users.createTempView("users")
 
 
-    //val vertices: VertexRDD[String] =
-    val vertices: RDD[(VertexId, String)] = users.rdd.map( toVertex ) // todo to jeszcze trzeba napisac w pliku Mappers
-      // users.map( toVertex )( vertexEncoder ).rdd// rdd.map( toVertex )
+    val vertices: RDD[(VertexId, String)] = users.rdd.map( toVertex )
 
 
-
-    val schema = StructType(
+    val usersChatSchema = StructType(
       StructField("user_id", StringType, nullable = false)
         :: StructField("chat_id", StringType, nullable = false)
         :: Nil)
@@ -83,52 +80,52 @@ class DbGraphRunner {
       .option("dbtable",  "users_chats")
       .option("user",     dbConfig.user)
       .option("password", dbConfig.pass)
-      .schema( schema )
+      //.schema( usersChatSchema )
       .load()
+      .withColumnRenamed("user_id", "ucid")
 
+    usersAndChats.createTempView("users_chats")
 
-    // to co będzie trzeba obliczyć to jaki procent połączeń obejmuje
-    // użytkowników oddalonych od siebie o więcej niż 6 użytkowników
+    // merging users with userChats to get user_num_id
+    val mergedChats = users.join(usersAndChats, expr("""uid = ucid"""))
 
-    // algorytm
-    /*
-    iterujemy po użytkownikach
-    mamy użytkownika start i teraz dla każdego startującego
-    iterujemy po kolejnym użytkowniku i sparwdzamy czy liczba węzłów jest mniejsza
-    lub równa 6 jeśli tak to dodajemy do
-     - lower
-    jeśli nie jest to dodajemy do
-     - upper
-
-    do takich obliczeń należy użyć GraphOps
-     */
+    mergedChats.toDF().foreach( r => logger.info(s"vertex -> user_num_id: ${r.getAs[VertexId](s"user_num_id")}"))
 
 
     // for using syntax: $"column_name"
     import sparkSession.implicits._
 
-    // val groupedChats = usersAndChats.groupBy( $"chat_id")
+    // grouping via chat_id
     val groupedChats2: KeyValueGroupedDataset[String, Row] =
-      usersAndChats.groupByKey(r => r.getAs[String](s"chat_id"))
+      mergedChats.groupByKey(r => r.getAs[String](s"chat_id"))
+
+    val preEdges = groupedChats2.flatMapGroups((chatId: String, rowIterator: Iterator[Row]) => {
+        // i tutaj trzeba po iteratorze wyłuskać wszystkie user_num_id z row'ów
+        // i utworzyć listę par z user_num_id
+        // następnie tę listę należy flatMappowac aby uzyskać właściwą RDD
+        val userNumIds = List.empty[Long]
+        while (rowIterator.hasNext) {
+          val r = rowIterator.next()
+          r.getAs[VertexId](s"user_num_id") :: userNumIds
+        }
+        val u = userNumIds.distinct
+        u.zip(u)
+          .filter(t => t._1 != t._2)
+          .map(t => {
+            if (t._1 < t._2) t
+            else (t._2, t._1)
+          })
+          .distinct
+          .map(t => (t._1, t._2, chatId))
+      })
+      .map(t => Edge(t._1, t._2, t._3))
+
+    preEdges.foreach( e => logger.info(s"edge -> srcVertex: ${e.srcId}, edgeValue: ${e.attr}, destVertex: ${e.dstId}"))
 
 
-    val edges: RDD[Edge[String]] = groupedChats2.flatMapGroups( (chatId: String, rowIterator: Iterator[Row]) => {
-      // i tutaj trzeba po iteratorze wyłuskać wszystkie user_num_id z row'ów
-      // i utworzyć listę par z user_num_id
-      // następnie tę listę należy flatMappowac aby uzyskać właściwą RDD
-      val userNumIds = List.empty[Long]
-      while (rowIterator.hasNext) {
-        val r = rowIterator.next()
-        r.getAs[VertexId](s"user_num_id") :: userNumIds
-      }
-      val u = userNumIds.distinct
-      // i teraz z tej listy tworzymy pary niepowtarzające się
+    // tutaj row iterator zawiera informacje o chatId oraz userId
+    val edges: RDD[Edge[String]] = preEdges.rdd
 
-      u.zip(u).map( t => {
-        if (t._1 < t._2) t
-        else (t._2, t._1)
-      }).distinct.map( t => (t._1, t._2, chatId))
-    }).map(t => Edge(t._1, t._2, t._3)).rdd
 
 
     // teraz tworzymy graf
@@ -138,32 +135,39 @@ class DbGraphRunner {
     val ops = new GraphOps[String, String](graph)
 
 
-    val pageRanked  = graph.pageRank(0.001)
-    val pageRankRev = graph.reverse.pageRank(0.001).vertices
+    val pageRanked  = graph.pageRank(0.01)
+    val pageRankRev = graph.reverse.pageRank(0.01).vertices
 
-    val pg = pageRanked.joinVertices(pageRankRev)((vid: VertexId, pg1: Double, pg2: Double) => (pg1 + pg2) / 2)
+    val pg = pageRanked.joinVertices(pageRankRev)((vid: VertexId, rank1: Double, rank2: Double) => (rank1 + rank2) / 2)
 
+    pg.vertices.toDS().foreach(
+      t => logger.info(s"user_num_id: ${t._1}, pageRank: ${t._2}")
+    )
 
-
-    pg.vertices
-      .toDS()
-      .foreach((vidAndValye) => {
-        val vid   = vidAndValye._1
-        val value = vidAndValye._2
-        // TODO i to pg teraz trzeba zapisać do DB
-
-
-      })
-
-
-
-
+//    pg.vertices
+//      .toDS()
+//      .foreach(vidAndValue => {
+//        val vid   = vidAndValue._1
+//        val value = vidAndValue._2
+//        // TODO i to pg teraz trzeba zapisać do DB
+//
+//
+//      })
 
 
 
   }
 
 
-
-
 }
+
+
+
+
+
+
+
+
+
+
+

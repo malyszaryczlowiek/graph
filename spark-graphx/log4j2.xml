@@ -21,6 +21,24 @@
             <AppenderRef ref="FILE" level="trace"/>
             <AppenderRef ref="CONSOLE" level="trace"/>
         </Logger>
+        <Logger name="io.github.malyszaryczlowiek.runners.DbGraphRunner" level="trace" additivity="false">
+            <!-- <Property name="user">${sys:user.name}</Property>-->
+            <AppenderRef ref="FILE" level="trace"/>
+            <AppenderRef ref="CONSOLE" level="trace"/>
+        </Logger>
+        <Logger name="DbGraphRunner" level="trace" additivity="false">
+            <AppenderRef ref="FILE" level="trace"/>
+            <AppenderRef ref="CONSOLE" level="trace"/>
+        </Logger>
+        <Logger name="io.github.malyszaryczlowiek.db.DatabaseSaver" level="trace" additivity="false">
+            <!-- <Property name="user">${sys:user.name}</Property>-->
+            <AppenderRef ref="FILE" level="trace"/>
+            <AppenderRef ref="CONSOLE" level="trace"/>
+        </Logger>
+        <Logger name="DatabaseSaver" level="trace" additivity="false">
+            <AppenderRef ref="FILE" level="trace"/>
+            <AppenderRef ref="CONSOLE" level="trace"/>
+        </Logger>
         <Root level="warn">
             <AppenderRef ref="CONSOLE"/>
             <AppenderRef ref="FILE"/>
