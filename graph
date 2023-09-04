@@ -2,13 +2,15 @@
 
 chmod +x ./spark-graphx/generateJAR
 
-mkdir ./spark-graphx/driver-jars
+postgres_v="42.3.3"
+
+# mkdir ./spark-graphx/driver-jars
 num_jars=$(ls -la ./spark-graphx/driver-jars | wc -l)
 
 if [[ $num_jars -lt 4 ]]; then
   echo "Downloading postgresql JAR"
   cd ./spark-graphx/driver-jars
-  curl -O https://jdbc.postgresql.org/download/postgresql-42.3.3.jar
+  curl -O https://jdbc.postgresql.org/download/postgresql-$postgres_v.jar
   # wget for example in bash terminal
   cd ../..
 fi
